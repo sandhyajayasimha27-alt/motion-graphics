@@ -1,0 +1,299 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Magnesium Motion</title>
+<style>
+  @font-face { font-family: 'Anton'; src: url(fonts/Anton.ttf) format('truetype'); }
+  @font-face { font-family: 'Inter'; font-weight: 500; src: url(fonts/Inter-500.ttf) format('truetype'); }
+  @font-face { font-family: 'Inter'; font-weight: 700; src: url(fonts/Inter-700.ttf) format('truetype'); }
+  @font-face { font-family: 'Inter'; font-weight: 800; src: url(fonts/Inter-800.ttf) format('truetype'); }
+  :root {
+    --navy: #050a12;
+    --teal-1: #0f5d7a; --teal-2: #073246; --teal-3: #04202f;
+    --orange-1: #ff8a3d; --orange-2: #e8611d;
+    --mint: #8ff2e1;
+  }
+  html, body { margin: 0; background: var(--navy); }
+  #stage {
+    position: relative; width: 1080px; height: 1920px; overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 38% at 50% 46%, rgba(30,140,150,.35), transparent 70%),
+      radial-gradient(ellipse 90% 60% at 50% 100%, rgba(10,60,90,.5), transparent 70%),
+      linear-gradient(180deg, #071422 0%, #050a12 60%, #03060b 100%);
+    font-family: 'Anton', Impact, sans-serif;
+  }
+  #floor {
+    position: absolute; left: 0; right: 0; top: 1380px; bottom: 0;
+    background: linear-gradient(180deg, rgba(20,80,100,.25), transparent 50%);
+  }
+  #floorline {
+    position: absolute; left: 90px; right: 90px; top: 1380px; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(143,242,225,.5), transparent);
+  }
+  .dust { position: absolute; border-radius: 50%; background: rgba(160,240,230,.6); filter: blur(1px); }
+
+  /* ---------- Box (oblique 3D: front + right side + top) ---------- */
+  #product {
+    position: absolute; left: 220px; top: 500px; width: 730px; height: 880px;
+    -webkit-box-reflect: below 0 linear-gradient(transparent 62%, rgba(255,255,255,.22));
+  }
+  .face { position: absolute; }
+  #front {
+    left: 0; top: 60px; width: 640px; height: 820px; overflow: hidden;
+    background: linear-gradient(160deg, var(--teal-1) 0%, var(--teal-2) 55%, var(--teal-3) 100%);
+    box-shadow: inset 0 0 0 2px rgba(143,242,225,.18), inset 0 40px 80px rgba(255,255,255,.06);
+  }
+  #side {
+    left: 640px; top: 0; width: 90px; height: 880px;
+    clip-path: polygon(0 60px, 90px 0, 90px 820px, 0 880px);
+    background: linear-gradient(180deg, #052434, #02131c);
+  }
+  #side-band {
+    left: 640px; top: 0; width: 90px; height: 880px;
+    clip-path: polygon(0 300px, 90px 240px, 90px 500px, 0 560px);
+    background: linear-gradient(180deg, #b44b14, #8a3609);
+  }
+  #top {
+    left: 0; top: 0; width: 730px; height: 60px;
+    clip-path: polygon(0 60px, 90px 0, 730px 0, 640px 60px);
+    background: linear-gradient(90deg, #1a7896, #0d4a62);
+  }
+  #band {
+    position: absolute; left: 0; right: 0; top: 240px; height: 260px;
+    background: linear-gradient(180deg, var(--orange-1), var(--orange-2));
+    box-shadow: 0 -2px 0 rgba(255,255,255,.25) inset, 0 6px 30px rgba(0,0,0,.35);
+  }
+  #badge {
+    position: absolute; left: 40px; top: 44px; width: 120px; height: 120px; border-radius: 22px;
+    border: 3px solid var(--mint); color: var(--mint); font-family: 'Inter', sans-serif;
+    display: grid; place-items: center; box-sizing: border-box;
+  }
+  #badge b { font-size: 58px; font-weight: 800; line-height: 1; margin-top: 14px; }
+  #badge small { position: absolute; top: 10px; left: 12px; font-size: 18px; font-weight: 700; }
+  #badge i { position: absolute; bottom: 8px; font-style: normal; font-size: 16px; letter-spacing: 1px; }
+  #toptag {
+    position: absolute; right: 40px; top: 60px; text-align: right; color: #d8f7f2;
+    font-family: 'Inter', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 5px; line-height: 1.6;
+    opacity: .85;
+  }
+  .crystal { position: absolute; background: linear-gradient(135deg, #b9fff3, #3fb8a8 60%, #1c6f6a); opacity: .85; }
+  #info {
+    position: absolute; left: 40px; right: 40px; top: 560px; color: #e6fbf8;
+    font-family: 'Inter', sans-serif; font-weight: 500; font-size: 26px; line-height: 1.7;
+  }
+  #info .pill {
+    display: inline-block; padding: 8px 22px; border-radius: 40px; background: var(--mint); color: #06324a;
+    font-weight: 800; letter-spacing: 2px; font-size: 24px; margin-bottom: 18px;
+  }
+  #count {
+    position: absolute; left: 40px; bottom: 36px; color: #fff; font-family: 'Inter', sans-serif;
+    font-weight: 800; font-size: 30px; letter-spacing: 4px;
+  }
+  #gloss {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.14) 45%, transparent 55%);
+    background-size: 300% 100%;
+  }
+
+  /* ---------- Animated title ---------- */
+  #word, #ghost1, #ghost2 {
+    position: absolute; left: 320px; top: 420px;
+    white-space: nowrap; font-size: 124px; letter-spacing: 6px; line-height: 1;
+    color: #fff; text-transform: uppercase; transform-origin: 50% 50%; will-change: transform;
+  }
+  #word { text-shadow: 0 5px 0 #a8410d, 0 12px 26px rgba(0,0,0,.4); }
+  #word .shine {
+    position: absolute; inset: 0; color: transparent;
+    background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,1) 50%, transparent 60%);
+    background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; text-shadow: none;
+  }
+  #ghost1 { color: rgba(143,242,225,.45); filter: blur(5px); }
+  #ghost2 { color: rgba(255,160,80,.35); filter: blur(12px); }
+  #sub {
+    position: absolute; left: 320px; top: 492px; font-family: 'Inter', sans-serif; font-weight: 800;
+    font-size: 30px; color: #06324a; text-transform: uppercase; white-space: nowrap;
+  }
+  #flash {
+    position: absolute; left: 320px; top: 430px; width: 900px; height: 900px; margin: -450px 0 0 -450px;
+    border-radius: 50%; pointer-events: none; mix-blend-mode: screen;
+    background: radial-gradient(circle, rgba(255,230,190,.6) 0%, rgba(255,160,80,.18) 35%, transparent 65%);
+  }
+  #ring {
+    position: absolute; left: 320px; top: 430px; width: 200px; height: 200px; margin: -100px 0 0 -100px;
+    border-radius: 50%; border: 4px solid rgba(143,242,225,.85); pointer-events: none;
+  }
+  .streak {
+    position: absolute; height: 3px; border-radius: 3px;
+    background: linear-gradient(90deg, transparent, rgba(160,255,240,.95));
+  }
+  .p { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #c6fff5; box-shadow: 0 0 12px #6fe8d6; }
+
+  #tagline {
+    position: absolute; left: 0; right: 0; top: 1640px; text-align: center; color: #e9fffb;
+    font-family: 'Inter', sans-serif; font-weight: 700; font-size: 34px; letter-spacing: 14px; text-transform: uppercase;
+  }
+  #tagline span { color: var(--orange-1); }
+  #vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(0,0,0,.6) 100%); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="dust"></div>
+  <div id="floor"></div>
+  <div id="floorline"></div>
+
+  <div id="product">
+    <div id="top" class="face"></div>
+    <div id="side" class="face"></div>
+    <div id="side-band" class="face"></div>
+    <div id="front" class="face">
+      <div class="crystal" style="left:-30px;top:430px;width:120px;height:150px;clip-path:polygon(30% 0,100% 25%,80% 100%,0 80%)"></div>
+      <div class="crystal" style="left:50px;top:520px;width:70px;height:90px;clip-path:polygon(40% 0,100% 40%,60% 100%,0 60%);opacity:.6"></div>
+      <div id="badge"><small>12</small><b>Mg</b><i>24.305</i></div>
+      <div id="toptag">PURE<br>MINERAL<br>SUPPORT</div>
+      <div id="band"></div>
+      <div id="info">
+        <div class="pill">NERVOUS SYSTEM SUPPORT</div><br>
+        • Highly absorbable form<br>
+        • Muscle, nerve &amp; heart function
+      </div>
+      <div id="count">180 TABLETS</div>
+      <div id="gloss"></div>
+    </div>
+
+    <div id="streaks"></div>
+    <div id="flash"></div>
+    <div id="ring"></div>
+    <div id="ghost2">Magnesium</div>
+    <div id="ghost1">Magnesium</div>
+    <div id="word">Magnesium<span class="shine">Magnesium</span></div>
+    <div id="sub">Glycinate</div>
+    <div id="particles"></div>
+  </div>
+
+  <div id="tagline">Recover <span>·</span> Sleep <span>·</span> Repeat</div>
+  <div id="vignette"></div>
+</div>
+<script>
+  // Every visual is a pure function of time t, so captured frames are deterministic.
+  const DURATION = 5.0;
+  const $ = id => document.getElementById(id);
+  const product = $('product'), word = $('word'), g1 = $('ghost1'), g2 = $('ghost2'), sub = $('sub');
+  const flash = $('flash'), ring = $('ring'), shine = word.querySelector('.shine'), gloss = $('gloss');
+  const tagline = $('tagline');
+
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const easeOut = x => 1 - Math.pow(1 - clamp(x), 3);
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  const PX = 320, PY = 430; // title anchor (centre of orange band, product coords)
+
+  const dust = [];
+  for (let i = 0; i < 45; i++) {
+    const el = document.createElement('div'); el.className = 'dust';
+    const s = 2 + rnd() * 5; el.style.width = el.style.height = s + 'px';
+    $('dust').appendChild(el);
+    dust.push({ el, x: rnd() * 1080, y: rnd() * 1920, sp: 10 + rnd() * 30, ph: rnd() * 6.28, o: .2 + rnd() * .6 });
+  }
+  const streaks = [];
+  for (let i = 0; i < 14; i++) {
+    const el = document.createElement('div'); el.className = 'streak';
+    $('streaks').appendChild(el);
+    streaks.push({ el, y: PY + (rnd() - .5) * 240, len: 200 + rnd() * 420, delay: rnd() * .2, speed: 3800 + rnd() * 2200 });
+  }
+  const parts = [];
+  for (let i = 0; i < 40; i++) {
+    const el = document.createElement('div'); el.className = 'p';
+    $('particles').appendChild(el);
+    const a = rnd() * Math.PI * 2;
+    parts.push({ el, vx: Math.cos(a) * (250 + rnd() * 450), vy: Math.sin(a) * (140 + rnd() * 320), s: .5 + rnd() });
+  }
+
+  const T_BOX = 0.0, T_IN = 0.9;
+  const W = 1500;                         // start offset, fully off-screen left
+  const D = 4.0, OMEGA = 9.0;             // damped spring: whip in, overshoot, settle
+  const T_HIT = T_IN + Math.PI / (2 * OMEGA);
+  const offset = t => t < T_IN ? -W : -W * Math.exp(-D * (t - T_IN)) * Math.cos(OMEGA * (t - T_IN));
+
+  function renderAt(t) {
+    // Box rises in, then idles with a gentle float; a jolt on word impact
+    const bi = easeOut((t - T_BOX) / 0.8);
+    const hit = t - T_HIT;
+    const jolt = hit > 0 ? 10 * Math.exp(-7 * hit) * Math.sin(28 * hit) : 0;
+    const float = Math.sin(t * 1.6) * 6;
+    product.style.opacity = bi;
+    product.style.transform = `translate(${jolt * .6}px, ${(1 - bi) * 120 + float + Math.abs(jolt)}px) scale(${0.94 + 0.06 * bi})`;
+
+    dust.forEach(d => {
+      d.el.style.left = (d.x + Math.sin(t + d.ph) * 20) + 'px';
+      d.el.style.top = (d.y - t * d.sp) + 'px';
+      d.el.style.opacity = d.o * (0.6 + 0.4 * Math.sin(t * 2 + d.ph));
+    });
+
+    // Title: slide from left with spring bounce, velocity-driven skew/stretch, impact squash
+    const x = offset(t);
+    const v = (offset(t + 1 / 120) - offset(t - 1 / 120)) * 60;
+    const skew = clamp(-v / 9000, -0.6, 0.6) * 25;
+    const stretch = 1 + clamp(Math.abs(v) / 22000, 0, .3);
+    const squash = hit > 0 ? 1 - 0.14 * Math.exp(-9 * hit) * Math.cos(26 * hit) : 1;
+    const tf = (dx, k = 1) =>
+      `translate(-50%, -50%) translate(${dx}px, 0) skewX(${skew * k}deg) scale(${stretch * (2 - squash)}, ${squash})`;
+    const visible = t >= T_IN ? 1 : 0;
+    word.style.transform = tf(x); word.style.opacity = visible;
+    const trail = clamp(Math.abs(v) / 6000);
+    g1.style.transform = tf(x - Math.sign(v) * 80 * trail, 1.3); g1.style.opacity = visible * trail;
+    g2.style.transform = tf(x - Math.sign(v) * 180 * trail, 1.6); g2.style.opacity = visible * trail * .8;
+
+    streaks.forEach(s => {
+      const lt = t - T_IN + 0.12 - s.delay;
+      const sx = -900 + lt * s.speed;
+      s.el.style.left = sx + 'px'; s.el.style.top = s.y + 'px'; s.el.style.width = s.len + 'px';
+      s.el.style.opacity = lt > 0 && sx < 1100 ? clamp(1 - lt * 1.7) : 0;
+    });
+
+    flash.style.opacity = hit > 0 ? Math.exp(-4 * hit) : 0;
+    flash.style.transform = `scale(${hit > 0 ? 0.6 + hit * 1.2 : .6})`;
+    const r = easeOut(hit / 0.9);
+    ring.style.opacity = hit > 0 ? (1 - r) * .9 : 0;
+    ring.style.transform = `scale(${1 + r * 7}, ${1 + r * 2.4})`;
+    parts.forEach(p => {
+      const k = Math.max(0, hit), dist = (1 - Math.exp(-2.5 * k)) * 0.8;
+      p.el.style.left = (PX + p.vx * dist) + 'px';
+      p.el.style.top = (PY + p.vy * dist + 70 * k * k) + 'px';
+      p.el.style.transform = `scale(${p.s})`;
+      p.el.style.opacity = hit > 0 ? clamp(1.2 - k / 1.5) : 0;
+    });
+
+    // Light sweep across the word and box once settled
+    const sw = clamp((t - (T_HIT + 1.0)) / 0.8);
+    shine.style.backgroundPosition = `${100 - sw * 100}% 0`;
+    shine.style.opacity = sw > 0 && sw < 1 ? 1 : 0;
+    const gs = clamp((t - (T_HIT + 1.1)) / 1.0);
+    gloss.style.backgroundPosition = `${100 - gs * 100}% 0`;
+    gloss.style.opacity = gs > 0 && gs < 1 ? 1 : 0;
+
+    // Sub-title tracks in under the word
+    const st = easeOut((t - (T_HIT + 0.5)) / 0.6);
+    sub.style.opacity = st;
+    sub.style.letterSpacing = (34 - 16 * st) + 'px';
+    sub.style.transform = `translate(-50%, 0) translateY(${(1 - st) * 24}px)`;
+
+    const tl = easeOut((t - (T_HIT + 1.4)) / 0.8);
+    tagline.style.opacity = tl;
+    tagline.style.transform = `translateY(${(1 - tl) * 30}px)`;
+  }
+
+  window.renderAt = renderAt;
+  window.DURATION = DURATION;
+
+  if (!new URLSearchParams(location.search).has('capture')) {
+    const start = performance.now();
+    const loop = now => { renderAt(((now - start) / 1000) % (DURATION + 1)); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  } else {
+    renderAt(0);
+  }
+</script>
+</body>
+</html>
